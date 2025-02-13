@@ -1,0 +1,160 @@
+---
+title: "Exercise1_Week5"
+author: "Lucy Bryson"
+format: html
+editor: visual
+---
+
+The following exercises are a test in disguise. Can you think of any improvements to the following code?
+
+Go through the exercises and answer them while fixing issues and improving on code workflow
+
+Make a Rmarkdown (or Quarto) version of this document with your responses
+
+Render the document in PDF and HTML formats
+
+```{r}
+rm(list=ls()) 
+
+library(tidyverse)
+```
+
+## PROBLEM 1
+
+Visualizing your data is important!
+
+Summary statistics can be highly misleading, and simply plotting the data can reveal a lot more! Lets look at the Anscombe’s Quartet data. There are four different data sets.
+
+Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21. doi:10.1080/00031305.1973.10478966. JSTOR 2682899.
+
+```{r}
+anscombe_quartet = readRDS("anscombe quartet.rds")
+```
+
+### Exploring the Data Set 
+
+```{r, exploration}
+str(anscombe_quartet)
+```
+
+#### What does the function str() do?
+
+It provides a list of variables to console, providing slight insight into the data
+
+#### Let's check some summary statistics:
+
+```{r, summary stats}
+anscombe_quartet %>% 
+  group_by(dataset) %>% 
+  summarise(
+    mean_x    = mean(x),
+    mean_y    = mean(y),
+    min_x     = min(x),
+    min_y     = min(y),
+    max_x     = max(x),
+    max_y     = max(y),
+    crrltn    = cor(x, y)
+  )
+```
+
+#### What do the summary statistics tell us about the different datasets?
+
+The summary statistics say the data sets are similar, with data set 4 having a higher minimum and maximum value
+
+#### Let's plot the data with ggplot:
+
+```{r, plotting the data}
+library(ggplot2)
+
+theme_set(theme_bw(base_size = 15) + theme(legend.position="bottom"))
+
+aq_plot <-
+ggplot(anscombe_quartet, aes(x=x,y=y)) +
+  geom_point() + 
+  geom_smooth(method = "lm",formula = "y ~ x") +
+    theme(panel.grid.minor = element_blank()) +
+   coord_cartesian(ylim = c(0, 20), xlim = c(0, 20)) +
+  facet_wrap(~dataset)
+```
+
+#### Save as plot - PNG format
+
+Width 5 inch, height = 5 inch for paper
+
+```{r, save plot}
+ggsave(filename ='anscombe_quartet.png', plot = aq_plot, width = 5, height = 5)
+```
+
+#### What do the plots tell us about the different datasets?
+
+Describe the relationship between x and y in the different datasets.
+
+-   X and Y have a postive relationship in both data set 1 and 3
+
+-   There is a normal distribution (seems like a U-shaped curve) in data set 2
+
+-   All variables in data set 4 seem to have the same X value with similar X values
+
+#### Would linear regression be an appropriate statistical model to analyse the x-y relationship in each dataset?
+
+-   For data set 1 and 3 yes
+
+-   For data set 2, as it is normally distributed, I would suggest using an ANOVA instead
+
+-   For data set 4, perhaps a t-test represented as a bar chart would be more effective analysis
+
+#### What conclusions can you draw for the plots and summary statistics?
+
+## PROBLEM 2
+
+Load in the datasaurus dataset.
+
+```{r, load in data}
+datasaurus_dozen = readRDS("datasaurus_dozen.rds")
+```
+
+#### Explore the different datasets in datasaurus_dozen
+
+```{r, explore the data}
+str(datasaurus_dozen)
+
+datasaurus_dozen %>% 
+  group_by(dataset) %>% 
+  summarise(
+    mean_x    = mean(x),
+    mean_y    = mean(y),
+    min_x     = min(x),
+    min_y     = min(y),
+    max_x     = max(x),
+    max_y     = max(y),
+    crrltn    = cor(x, y)
+  )
+```
+
+#### Calculate the correlations for x and y
+
+```{r, calculate correlations}
+	r1 <- lm(x ~ y, datasaurus_dozen)
+summary(r1)
+
+```
+
+#### Plot their relationships including the line of best fit.
+
+```{r, plotting including line of best fit}
+	library('GGally')
+p2 <- ggplot(datasaurus_dozen, aes(x = x, y = y)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  facet_wrap(~dataset) +
+  labs(title = "Scatter Plots with Line of Best Fit",
+       x = "X Axis",
+       y = "Y Axis") +
+  theme_minimal()
+```
+
+#### Save the plot
+
+```{r, save the plot}
+ggsave(filename ='datasauras_dozen.png', plot = p2, width = 5, height = 5)
+```
